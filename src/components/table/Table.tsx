@@ -1,50 +1,70 @@
+import {
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Tooltip,
+} from '@mui/material';
 import { PropsWithChildren, ReactElement } from 'react';
-import { TableOptions, useTable } from 'react-table';
+import { TableOptions, useTable, useSortBy } from 'react-table';
 
-export interface TableProperties<T extends Record<string, unknown>> extends TableOptions<T> {
-  name?: string;
-}
-
-export const Table = <T extends Record<string, unknown>>(
-  props: PropsWithChildren<TableProperties<T>>
-): ReactElement => {
-  const { columns } = props;
-
-  const { rows, getTableProps, headerGroups, getTableBodyProps, prepareRow } = useTable<T>({
-    ...props,
-    columns,
-  });
+export const Table = <T extends Record<string, unknown>>({
+  columns,
+  data,
+}: PropsWithChildren<TableOptions<T>>): ReactElement => {
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable<T>(
+    {
+      columns,
+      data,
+    },
+    useSortBy
+  );
 
   return (
-    <table {...getTableProps()}>
-      <thead>
+    <TableContainer {...getTableProps()}>
+      <TableHead>
         {headerGroups.map((headerGroup, index) => (
-          <tr {...headerGroup.getHeaderGroupProps()} key={index}>
-            {headerGroup.headers.map((column) => (
-              <th {...column.getHeaderProps()} key={index}>
-                {column.render('Header')}
-              </th>
-            ))}
-          </tr>
+          <TableRow {...headerGroup.getHeaderGroupProps()} key={index}>
+            {headerGroup.headers.map((column, index) => {
+              const { title: sortTitle = '', ...columnSortByProps } = column.getSortByToggleProps();
+
+              return (
+                <TableCell {...column.getHeaderProps(column.getSortByToggleProps())} key={index}>
+                  <Tooltip title={sortTitle}>
+                    <TableSortLabel
+                      active={true}
+                      direction={column.isSortedDesc ? 'desc' : 'asc'}
+                      {...columnSortByProps}
+                    >
+                      {column.render('Header')}
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+              );
+            })}
+          </TableRow>
         ))}
-      </thead>
-      <tbody {...getTableBodyProps()}>
+      </TableHead>
+
+      <TableBody {...getTableBodyProps()}>
         {rows.map((row, index) => {
           prepareRow(row);
           return (
-            <tr {...row.getRowProps()} key={index}>
+            <TableRow {...row.getRowProps()} key={index}>
               {row.cells.map((cell, index) => {
                 return (
-                  <td {...cell.getCellProps()} key={index}>
+                  <TableCell {...cell.getCellProps()} key={index}>
                     {cell.render('Cell')}
-                  </td>
+                  </TableCell>
                 );
               })}
-            </tr>
+            </TableRow>
           );
         })}
-      </tbody>
-    </table>
+      </TableBody>
+    </TableContainer>
   );
 };
 
