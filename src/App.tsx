@@ -1,5 +1,21 @@
+import { useEffect, useState } from 'react';
+import Table from './components/table/Table';
+import { getAll } from './services/http/fake-authors';
+import { Author } from './types/author';
+import { authorColumns } from './utils/table/constants';
+
 const App = () => {
-  return <h1>Table app</h1>;
+  const [authors, setAuthors] = useState<Author[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const response = await getAll();
+
+      setAuthors(response.data);
+    })();
+  }, []);
+
+  return <Table<Author> columns={authorColumns} data={authors} />;
 };
 
 export default App;
