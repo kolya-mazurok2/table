@@ -1,4 +1,4 @@
-export interface HTTP_RESPONSE<T> {
-  data: T;
+export interface HTTP_RESPONSE {
+  data: any;
   success: boolean;
 }
