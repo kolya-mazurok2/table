@@ -15,7 +15,7 @@ const App = () => {
     })();
   }, []);
 
-  return <Table<Author> columns={authorColumns} data={authors} />;
+  return <Table<Author> columns={authorColumns} data={authors} hasGlobalSearch={true} />;
 };
 
 export default App;
