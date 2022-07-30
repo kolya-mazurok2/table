@@ -8,10 +8,12 @@ import {
   TableSortLabel,
   Tooltip,
 } from '@mui/material';
-import { PropsWithChildren, ReactElement } from 'react';
+import { PropsWithChildren, ReactElement, useEffect } from 'react';
 import { TableOptions, useTable, useSortBy, useGlobalFilter, useRowSelect } from 'react-table';
+import { usePrevious } from '../../utils';
 import { useRowSelectByCheckbox } from './hooks';
 import SearchBox from './SearchBox';
+import { isEqual } from 'lodash';
 
 const Table = <T extends Record<string, unknown> & { id: number | string }>({
   columns,
@@ -19,10 +21,14 @@ const Table = <T extends Record<string, unknown> & { id: number | string }>({
   hasGlobalSearch,
   hasSortBy,
   hasRowSelection,
-}: PropsWithChildren<TableOptions<T>>): ReactElement => {
+  onRowsSelected,
+}: PropsWithChildren<TableOptions<T>> & {
+  hasGlobalSearch?: boolean;
+  hasSortBy?: boolean;
+  hasRowSelection?: boolean;
+  onRowsSelected?: (ids: (string | number)[]) => void;
+}): ReactElement => {
   const hooks = [useGlobalFilter, useSortBy, useRowSelect, useRowSelectByCheckbox];
-
-  console.log(hooks);
 
   const {
     getTableProps,
@@ -39,6 +45,18 @@ const Table = <T extends Record<string, unknown> & { id: number | string }>({
     },
     ...hooks
   );
+
+  const prevSelectedRowIds = usePrevious(state.selectedRowIds);
+
+  useEffect(() => {
+    if (isEqual(prevSelectedRowIds, state.selectedRowIds)) {
+      return;
+    }
+
+    const keys = Object.keys(state.selectedRowIds);
+
+    onRowsSelected?.(rows.filter((row) => keys.includes(row.id)).map((row) => row.original.id));
+  }, [state.selectedRowIds]);
 
   return (
     <Box>
