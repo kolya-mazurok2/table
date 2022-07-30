@@ -15,7 +15,15 @@ const App = () => {
     })();
   }, []);
 
-  return <Table<Author> columns={authorColumns} data={authors} hasGlobalSearch={true} />;
+  return (
+    <Table<Author>
+      columns={authorColumns}
+      data={authors}
+      hasGlobalSearch={true}
+      hasSortBy={true}
+      hasRowSelection={true}
+    />
+  );
 };
 
 export default App;
