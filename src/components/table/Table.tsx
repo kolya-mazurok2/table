@@ -9,14 +9,21 @@ import {
   Tooltip,
 } from '@mui/material';
 import { PropsWithChildren, ReactElement } from 'react';
-import { TableOptions, useTable, useSortBy, useGlobalFilter } from 'react-table';
+import { TableOptions, useTable, useSortBy, useGlobalFilter, useRowSelect } from 'react-table';
+import { useRowSelectByCheckbox } from './hooks';
 import SearchBox from './SearchBox';
 
-const Table = <T extends Record<string, unknown>>({
+const Table = <T extends Record<string, unknown> & { id: number | string }>({
   columns,
   data,
   hasGlobalSearch,
+  hasSortBy,
+  hasRowSelection,
 }: PropsWithChildren<TableOptions<T>>): ReactElement => {
+  const hooks = [useGlobalFilter, useSortBy, useRowSelect, useRowSelectByCheckbox];
+
+  console.log(hooks);
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -30,8 +37,7 @@ const Table = <T extends Record<string, unknown>>({
       columns,
       data,
     },
-    useGlobalFilter,
-    useSortBy
+    ...hooks
   );
 
   return (
@@ -45,20 +51,27 @@ const Table = <T extends Record<string, unknown>>({
           {headerGroups.map((headerGroup, index) => (
             <TableRow {...headerGroup.getHeaderGroupProps()} key={index}>
               {headerGroup.headers.map((column, index) => {
+                if (!hasRowSelection && column.id === 'selection') {
+                  return;
+                }
+
                 const { title: sortTitle = '', ...columnSortByProps } =
                   column.getSortByToggleProps();
 
-                return (
+                return hasSortBy && column.canSort ? (
                   <TableCell {...column.getHeaderProps(column.getSortByToggleProps())} key={index}>
                     <Tooltip title={sortTitle}>
                       <TableSortLabel
-                        active={true}
                         direction={column.isSortedDesc ? 'desc' : 'asc'}
                         {...columnSortByProps}
                       >
                         {column.render('Header')}
                       </TableSortLabel>
                     </Tooltip>
+                  </TableCell>
+                ) : (
+                  <TableCell {...column.getHeaderProps()} key={index}>
+                    {column.render('Header')}
                   </TableCell>
                 );
               })}
@@ -72,6 +85,10 @@ const Table = <T extends Record<string, unknown>>({
             return (
               <TableRow {...row.getRowProps()} key={index}>
                 {row.cells.map((cell, index) => {
+                  if (!hasRowSelection && cell.column.id === 'selection') {
+                    return;
+                  }
+
                   return (
                     <TableCell {...cell.getCellProps()} key={index}>
                       {cell.render('Cell')}
