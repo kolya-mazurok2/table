@@ -5,4 +5,11 @@ const getAuthors = (state: RootState) => state.authors;
 
 export const getAuthorsSelector = createSelector(getAuthors, (authors) => authors.entities);
 
-export const getSelectedAuthors = createSelector(getAuthors, (authors) => authors.selectedEntities);
+export const getSelectedAuthorsSelector = createSelector(
+  getAuthors,
+  (authors) => authors.selectedEntities
+);
+
+export const getSelectedAuthorsIdsSelector = createSelector(getAuthors, (authors) =>
+  authors.selectedEntities.map((author) => author.id)
+);
