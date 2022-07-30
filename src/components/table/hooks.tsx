@@ -2,7 +2,6 @@ import { Checkbox } from '@mui/material';
 import { Hooks } from 'react-table';
 
 export const useRowSelectByCheckbox = <D extends object>(hooks: Hooks<D>): void => {
-  console.log(hooks);
   hooks.allColumns.push((columns) => [
     {
       id: 'selection',
